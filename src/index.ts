@@ -26,3 +26,25 @@ app.get("/notes", (_req, res) => {
 app.listen(port, () => {
   console.log(`サーバー起動中 http://localhost:${port}`);
 });
+
+// "/notes"にpostリクエスト
+app.post("/notes", (req, res) => {
+  const { title, content } = req.body;
+
+  // SQLiteに保存
+  const result = db
+    .prepare(
+      `
+    INSERT INTO notes (title, content)
+    VALUES (?, ?)
+    `,
+    )
+    .run(title, content);
+
+  // 保存した内容をJSONで返す（201:新しいリソースを作成）
+  res.status(201).json({
+    id: result.lastInsertRowid,
+    title,
+    content,
+  });
+});
