@@ -125,6 +125,6 @@ app.delete("/notes/:id", (req, res) => {
   }
 
   // 204 No Content: 処理は成功したけど、返す本文はない
-  // send: 本文なしのレスポンスを返して終わり
+  // send: 本文なしのレスポンスを返して終了。res.status(204);とするとレスポンスを返し終わっていない。
   res.status(204).send();
 });
