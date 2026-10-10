@@ -28,7 +28,8 @@ app.listen(port, () => {
 });
 
 /**
- * データをテーブルに保存しJSONとして返す
+ * 新規データをテーブルに保存しJSONとして返す
+ * curl -X POST http://localhost:3000/notes -H "Content-Type: application/json" -d '{"title":"買い物","content":"牛乳を買う"}'
  */
 app.post("/notes", (req, res) => {
   const { title, content } = req.body;
@@ -55,6 +56,7 @@ app.post("/notes", (req, res) => {
 
 /**
  * 指定されたIDのレコードを検索しJSONで返す
+ * curl http://localhost:3000/notes/1
  */
 app.get("/notes/:id", (req, res) => {
   const id = Number(req.params.id); // /notes/3 にアクセスすると文字列"3"が返ってくる
@@ -71,7 +73,11 @@ app.get("/notes/:id", (req, res) => {
   res.json(note);
 });
 
-// 更新処理
+/**
+ * 既存のレコードを更新し、新しくなったレコードのJSONを返す
+ * curl -X PUT http://localhost:3000/notes/1 -H "Content-Type: application/json" -d '{"title":"買い物メモ","content":"牛乳と卵を買う"}'
+ * (-H: ヘッダー、 -d: データ)
+ */
 app.put("/notes/:id", (req, res) => {
   const id = Number(req.params.id);
   const { title, content } = req.body;
@@ -87,13 +93,38 @@ app.put("/notes/:id", (req, res) => {
     )
     .run(title, content, id);
 
+  // changes: 更新件数。runの実行結果に入っている。0件=idに誤りがある
   if (result.changes === 0) {
     return res.status(404).json({
-      message: "noteが見つかりません",
+      message: "レコードが見つかりません",
     });
   }
 
+  // idに一致するレコードを1件取得
   const updateNote = db.prepare("SELECT * FROM notes WHERE id = ?").get(id);
 
+  // 取得した
   res.json(updateNote);
+});
+
+/**
+ * 削除処理
+ * curl -i -X DELETE http://localhost:3000/notes/1
+ * （-i: httpヘッダー見れる）
+ */
+app.delete("/notes/:id", (req, res) => {
+  const id = Number(req.params.id);
+
+  // テーブルから指定したidのレコードを削除
+  const result = db.prepare("DELETE FROM notes WHERE id = ?").run(id);
+
+  if (result.changes === 0) {
+    return res.status(404).json({
+      message: "レコードが見つかりません",
+    });
+  }
+
+  // 204 No Content: 処理は成功したけど、返す本文はない
+  // send: 本文なしのレスポンスを返して終わり
+  res.status(204).send();
 });
