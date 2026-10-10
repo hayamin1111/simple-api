@@ -1,4 +1,5 @@
 import express from "express";
+import db from "@/db.js";
 
 const app = express(); // アプリケーションを管理するオブジェクトの作成
 const port = 3000;
@@ -12,6 +13,13 @@ app.get("/", (_req, res) => {
   res.json({
     message: "簡易メモAPI",
   });
+});
+
+// "/notes"にgetリクエスト
+app.get("/notes", (_req, res) => {
+  const notes = db.prepare("SELECT * FROM notes").all();
+
+  res.json(notes);
 });
 
 // webサーバの起動

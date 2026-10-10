@@ -3,7 +3,7 @@
     "rootDir": "./src",
     "outDir": "./dist",
 
-    "module": "NodeNext",
+    "module": "NodeNext", // import時は最終的にNode.jsが実行するJavaScript側のパスを書く
     "moduleResolution": "NodeNext",
     "target": "ES2022",
     "types": ["node"],
